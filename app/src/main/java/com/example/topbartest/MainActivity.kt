@@ -33,6 +33,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -47,8 +48,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TopbarTestTheme {
-                var tituloPasado by rememberSaveable { mutableStateOf("titulo") }
-                var show by remember { mutableStateOf(true) }
+                var tituloPasado by rememberSaveable { mutableStateOf("IES caminas") }
+                var show by remember { mutableStateOf(false) }
+                val navController = rememberNavController()
 
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
@@ -61,19 +63,26 @@ class MainActivity : ComponentActivity() {
                         )
                     },
                     floatingActionButton = {
-                        FloatingActionButton(
-                            onClick = { show=false },
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Floating action button.")
+                        if (show){
+                            FloatingActionButton(
+                                onClick = { show=false
+                                    navController.navigate("Principal")
+                                    tituloPasado= "IES caminas"
+                                }
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Floating action button.")
+                            }
                         }
+
                     }
                 )
                 { innerPadding ->
-                    val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = "Principal") {
                         composable("Principal") {principal(navController,
-                            Modifier.padding(innerPadding),{tituloPasado = it},{show=it})  }
-                        composable("Comentarios") {secundario(navController,
+                            Modifier.padding(innerPadding),
+                            {tituloPasado = it},{show=it})
+                        }
+                        composable("Secundario") {secundario(navController,
                             Modifier.padding(innerPadding))  }
 
                     }
@@ -93,15 +102,25 @@ fun principal(navController: NavHostController, modifier: Modifier = Modifier,
         ){
         TextButton(onClick = {titulo("test1")
                                 show(true)
-                             }, modifier = Modifier
+            navController.navigate("Secundario")
+
+        }, modifier = Modifier
         ) {
             Text("test1")
         }
-        TextButton(onClick = {titulo("test2") }, modifier = Modifier
+        TextButton(onClick = {titulo("test2")
+                                show(true)
+            navController.navigate("Secundario")
+
+        }, modifier = Modifier
         ) {
             Text("test2")
         }
-        TextButton(onClick = { titulo("test3")}, modifier = Modifier
+        TextButton(onClick = { titulo("test3")
+                                show(true)
+            navController.navigate("Secundario")
+
+        }, modifier = Modifier
         ) {
             Text("test3")
         }
