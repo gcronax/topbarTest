@@ -100,29 +100,29 @@ fun principal(navController: NavHostController, modifier: Modifier = Modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
         ){
-        TextButton(onClick = {titulo("test1")
+        TextButton(onClick = {titulo("Información")
                                 show(true)
             navController.navigate("Secundario")
 
         }, modifier = Modifier
         ) {
-            Text("test1")
+            Text("Información")
         }
-        TextButton(onClick = {titulo("test2")
+        TextButton(onClick = {titulo("Administración")
                                 show(true)
             navController.navigate("Secundario")
 
         }, modifier = Modifier
         ) {
-            Text("test2")
+            Text("Administración")
         }
-        TextButton(onClick = { titulo("test3")
+        TextButton(onClick = { titulo("Comercio")
                                 show(true)
             navController.navigate("Secundario")
 
         }, modifier = Modifier
         ) {
-            Text("test3")
+            Text("Comercio")
         }
 
     }
