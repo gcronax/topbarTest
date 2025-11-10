@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -54,7 +55,7 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
-                        TopAppBar(
+                        CenterAlignedTopAppBar(
                             title = { Text(text = tituloPasado) },
                             colors= TopAppBarDefaults.topAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
@@ -103,8 +104,7 @@ fun principal(navController: NavHostController, modifier: Modifier = Modifier,
         TextButton(onClick = {titulo("Información")
                                 show(true)
             navController.navigate("Secundario")
-
-        }, modifier = Modifier
+                             }, modifier = Modifier
         ) {
             Text("Información")
         }
