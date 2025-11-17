@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">topbarTest</string>
+    <string name="stag123">staggered</string>
+
 </resources>
