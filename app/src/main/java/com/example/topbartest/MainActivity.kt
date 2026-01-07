@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TopbarTestTheme {
                 var tituloPasado by rememberSaveable { mutableStateOf("Places in the world") }
-                var show by remember { mutableStateOf(false) }
+                var show by remember { mutableStateOf(true) }
                 var select by remember { mutableIntStateOf(1) }
                 val navController = rememberNavController()
                 val boxes by remember {
@@ -211,9 +211,9 @@ class MainActivity : ComponentActivity() {
                     floatingActionButton = {
 
                             FloatingActionButton(
-                                onClick = { show=false
-                                    navController.navigate("Principal")
-                                    tituloPasado= "IES caminas"
+                                onClick = {
+                                    show=false
+                                    select=1
                                 }
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, "Floating action button.")
