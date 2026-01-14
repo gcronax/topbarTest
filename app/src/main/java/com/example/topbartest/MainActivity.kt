@@ -1,16 +1,20 @@
 package com.example.topbartest
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -49,12 +53,14 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.palette.graphics.Palette
 
 import com.example.topbartest.ui.theme.TopbarTestTheme
 import com.example.topbartest.ui.theme.secondary
@@ -149,6 +155,8 @@ class MainActivity : ComponentActivity() {
                         ))
                 }
                 var imagenSelected by remember { mutableStateOf(boxes[0]) }
+                var colorRGBSelected: Color by remember { mutableStateOf(Color(0xFFFFFFFF)) }
+                var colorTitleSelected: Color by remember { mutableStateOf(Color(0xFFFFFFFF)) }
 
 
                 Scaffold(modifier = Modifier.fillMaxSize(),
@@ -158,6 +166,7 @@ class MainActivity : ComponentActivity() {
                                 color = Color(0xFFFFFFFF)
                                 )
                                     },
+
                             actions = {
                                 var expanded by remember { mutableStateOf(false) }
 
@@ -203,17 +212,17 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             colors= TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                containerColor = colorRGBSelected,
+                                titleContentColor = colorTitleSelected,
                             )
                         )
                     },
                     floatingActionButton = {
 
                             FloatingActionButton(
-                                onClick = {
-                                    show=false
-                                    select=1
+                                onClick = { show=false
+                                    navController.navigate("Principal")
+                                    tituloPasado= "IES caminas"
                                 }
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, "Floating action button.")
@@ -238,7 +247,9 @@ class MainActivity : ComponentActivity() {
                         )
                         3->transformaciones(
                             modifier = Modifier.padding(innerPadding),
-                            imagen= imagenSelected
+                            imagen= imagenSelected,
+                            colorRGBSelected = {  colorRGBSelected= it},
+                            colorTitleSelected = {  colorTitleSelected= it},
                         )
                     }
 
@@ -343,13 +354,11 @@ fun secundario(
 }
 
 @Composable
-fun transformaciones(modifier: Modifier, imagen: imagen) {
-    var selectR by remember { mutableFloatStateOf(1.0f) }
-    var selectS by remember { mutableFloatStateOf(1.0f) }
-    var selectA by remember { mutableFloatStateOf(1.0f) }
-    var selectB by remember { mutableFloatStateOf(0.0f) }
-
-
+fun transformaciones(modifier: Modifier,
+                     imagen: imagen,
+                     colorRGBSelected: (Color) -> Unit,
+                     colorTitleSelected: (Color) -> Unit,
+                     ) {
 
     Column(modifier.fillMaxSize(),
         Arrangement.Center,
@@ -365,61 +374,70 @@ fun transformaciones(modifier: Modifier, imagen: imagen) {
         Image(
             painter = painterResource(imagen.direccion),
             contentDescription = null,
-                    modifier = Modifier.blur(
-                        radiusX = selectB.dp,
-                        radiusY = selectB.dp,
-                        edgeTreatment = BlurredEdgeTreatment.Unbounded)
-                .graphicsLayer {
-                    this.scaleX= selectS
-                    this.rotationY = selectR
-                    this.alpha = selectA
 
-                }
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ){
-            Text("rotación")
-            Slider(
-                value = selectR,
-                onValueChange = { selectR = it },
-                valueRange = 0f..500f
+        val context = LocalContext.current
+        val bitmap = remember {
+            BitmapFactory.decodeResource(context.resources, imagen.direccion)
+        }
+        val palette = remember {
+            Palette.from(bitmap).generate()
+        }
+
+        val vibrant: Palette.Swatch? = palette?.vibrantSwatch
+        val darkvibrant: Palette.Swatch? = palette?.darkVibrantSwatch
+        val lightvibrant: Palette.Swatch? = palette?.lightVibrantSwatch
+        val muted: Palette.Swatch? = palette?.mutedSwatch
+        val darkmuted: Palette.Swatch? = palette?.darkMutedSwatch
+        val lightmuted: Palette.Swatch? = palette?.lightMutedSwatch
+
+
+        Row (Modifier.fillMaxWidth().background(
+            color = vibrant?.let { Color(it.rgb) } ?: Color.Unspecified,
+            )){
+            Text("vibrant",
+                color = vibrant?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
             )
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ){
-            Text("escalado")
-            Slider(
-                value = selectS,
-                onValueChange = { selectS = it },
-                valueRange = 0f..50f
+        colorRGBSelected(vibrant?.let { Color(it.rgb) } ?: Color.Unspecified)
+        colorTitleSelected(vibrant?.let { Color(it.titleTextColor) } ?: Color.Unspecified)
+        Row (Modifier.fillMaxWidth().background(
+            color = darkvibrant?.let { Color(it.rgb) } ?: Color.Unspecified,
+        )){
+            Text("darkvibrant",
+                color = darkvibrant?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
             )
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ){
-            Text("alpha")
-            Slider(
-                value = selectA,
-                onValueChange = { selectA = it },
-                valueRange = 0f..1f
+        Row (Modifier.fillMaxWidth().background(
+            color = lightvibrant?.let { Color(it.rgb) } ?: Color.Unspecified,
+        )){
+            Text("lightvibrant",
+                color = lightvibrant?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
             )
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ){
-            Text("desenfoque")
-            Slider(
-                value = selectB,
-                onValueChange = { selectB = it },
-                valueRange = 0f..100f
+        Row (Modifier.fillMaxWidth().background(
+            color = muted?.let { Color(it.rgb) } ?: Color.Unspecified,
+        )){
+            Text("muted",
+                color = muted?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
             )
         }
+        Row (Modifier.fillMaxWidth().background(
+            color = darkmuted?.let { Color(it.rgb) } ?: Color.Unspecified,
+        )){
+            Text("darkmuted",
+                color = darkmuted?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
+            )
+        }
+        Row (Modifier.fillMaxWidth().background(
+            color = lightmuted?.let { Color(it.rgb) } ?: Color.Unspecified,
+        )){
+            Text("lightmuted",
+                color = lightmuted?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
+            )
+        }
+
+
 
     }
 
