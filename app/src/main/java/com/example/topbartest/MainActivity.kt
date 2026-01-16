@@ -6,6 +6,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,6 +66,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -75,7 +85,6 @@ class MainActivity : ComponentActivity() {
             TopbarTestTheme {
                 var tituloPasado by rememberSaveable { mutableStateOf("Places in the world") }
                 var show by remember { mutableStateOf(true) }
-                var select by remember { mutableIntStateOf(1) }
                 val navController = rememberNavController()
                 val boxes by remember {
                     mutableStateOf(listOf(
@@ -155,8 +164,8 @@ class MainActivity : ComponentActivity() {
                         ))
                 }
                 var imagenSelected by remember { mutableStateOf(boxes[0]) }
-                var colorRGBSelected: Color by remember { mutableStateOf(Color(0xFFFFFFFF)) }
-                var colorTitleSelected: Color by remember { mutableStateOf(Color(0xFFFFFFFF)) }
+                var colorRGBSelected: Color by remember { mutableStateOf(Color(0xFF363333)) }
+                var colorTitleSelected: Color by remember { mutableStateOf(Color(0xFF000000)) }
 
 
                 Scaffold(modifier = Modifier.fillMaxSize(),
@@ -187,7 +196,7 @@ class MainActivity : ComponentActivity() {
                                     ) {
                                         DropdownMenuItem(
                                             onClick = { expanded = false
-                                                select=1
+                                                navController.navigate("Principal")
                                             },
                                             leadingIcon ={
                                                 Icon(imageVector = Icons.Filled.Share,
@@ -198,7 +207,7 @@ class MainActivity : ComponentActivity() {
                                         )
                                         DropdownMenuItem(
                                             onClick = { expanded = false
-                                                      select=2
+                                                navController.navigate("Secundario")
                                                       },
                                             leadingIcon ={
                                                 Icon(imageVector = Icons.Filled.Lock,
@@ -222,7 +231,6 @@ class MainActivity : ComponentActivity() {
                             FloatingActionButton(
                                 onClick = { show=false
                                     navController.navigate("Principal")
-                                    tituloPasado= "IES caminas"
                                 }
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, "Floating action button.")
@@ -232,33 +240,61 @@ class MainActivity : ComponentActivity() {
                     }
                 )
                 { innerPadding ->
-                    when(select){
-                        1->principal(modifier = Modifier.padding(innerPadding),
-                            boxes=boxes,
-                            imagenSelected = { imagenSelected = it},
-                            select={select=it}
-                            )
-                        2->secundario(modifier = Modifier.padding(innerPadding),
-                            boxes=boxes,
-                            imagenSelected = { imagenSelected = it},
-                            select={select=it}
-
-
-                        )
-                        3->transformaciones(
-                            modifier = Modifier.padding(innerPadding),
-                            imagen= imagenSelected,
-                            colorRGBSelected = {  colorRGBSelected= it},
-                            colorTitleSelected = {  colorTitleSelected= it},
-                        )
-                    }
-
-                    NavHost(navController = navController, startDestination = "Principal") {
+                    val navController = rememberNavController()
+                    NavHost(
+                        navController = navController, startDestination = "landing",
+                        enterTransition = { EnterTransition.None },
+                        exitTransition = { ExitTransition.None }                    ) {
                         composable("Principal") {
-
+                            principal(modifier = Modifier.padding(innerPadding),
+                                boxes=boxes,
+                                imagenSelected = { imagenSelected = it},
+                                navController=navController
+                            )
                         }
                         composable("Secundario") {
+                            secundario(modifier = Modifier.padding(innerPadding),
+                                boxes=boxes,
+                                imagenSelected = { imagenSelected = it},
+                                navController=navController
 
+                            )
+                        }
+                        composable("Terciario",
+                            enterTransition = {
+                                fadeIn(
+                                    animationSpec = tween(
+                                        300, easing = LinearEasing
+                                    )
+                                ) + slideIntoContainer(
+                                    animationSpec = tween(300, easing = EaseIn),
+                                    towards = AnimatedContentTransitionScope.SlideDirection.Start
+                                )
+
+
+                            },
+                            exitTransition = {
+                                fadeOut(
+                                    animationSpec = tween(
+                                        300, easing = LinearEasing
+                                    )
+                                ) + slideOutOfContainer(
+                                    animationSpec = tween(300, easing = EaseOut),
+                                    towards = AnimatedContentTransitionScope.SlideDirection.End
+                                )
+
+
+                            }
+
+
+
+                            ) {
+                            transformaciones(
+                                modifier = Modifier.padding(innerPadding),
+                                imagen= imagenSelected,
+                                colorRGBSelected = {  colorRGBSelected= it},
+                                colorTitleSelected = {  colorTitleSelected= it},
+                            )
                         }
 
                     }
@@ -280,7 +316,7 @@ fun principal(
      modifier: Modifier,
      boxes: List<imagen>,
      imagenSelected: (imagen) -> Unit,
-     select: (Int)-> Unit
+     navController: NavHostController
 ) {
     val gridState = rememberLazyStaggeredGridState()
 
@@ -293,7 +329,7 @@ fun principal(
                     Box(
                         modifier = Modifier.padding(5.dp).clickable(
                             onClick = {
-                                select(3)
+                                navController.navigate("Terciario")
                                 imagenSelected(boxes[indice])
                             }
                         )
@@ -318,7 +354,7 @@ fun secundario(
     modifier: Modifier = Modifier,
     boxes: List<imagen>,
     imagenSelected: (imagen) -> Unit,
-    select: (Int)-> Unit
+    navController: NavHostController
 
 ) {
     val gridState = rememberLazyStaggeredGridState()
@@ -330,7 +366,7 @@ fun secundario(
                 Box(
                     modifier = Modifier.padding(5.dp).clickable(
                         onClick = {
-                            select(3)
+                            navController.navigate("Terciario")
                             imagenSelected(boxes[indice])
                         }
                     )
@@ -445,45 +481,3 @@ fun transformaciones(modifier: Modifier,
 
 }
 
-@Composable
-fun IconDropDownMenu(modifier: Modifier) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Column(Modifier.padding(20.dp)) {
-        IconButton(onClick = {
-            expanded = true
-        }) {
-            Icon(imageVector = Icons.Filled.MoreVert,
-                contentDescription = "Buscar",
-                tint= secondary
-            )
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-//            modifier = modifier.align(Alignment.End)
-        ) {
-            DropdownMenuItem(
-                onClick = { expanded = false
-                          },
-                leadingIcon ={
-                    Icon(imageVector = Icons.Filled.Share,
-                        contentDescription = "Compartir")
-                },
-                text = {Text(text = "Compartir")}
-
-            )
-            DropdownMenuItem(
-                onClick = { expanded = false },
-                leadingIcon ={
-                    Icon(imageVector = Icons.Filled.Lock,
-                        contentDescription = "Compartir")
-                },
-                text = {Text(text = "Album")},
-
-                )
-
-        }
-    }
-}
