@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -84,7 +85,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             TopbarTestTheme {
                 var tituloPasado by rememberSaveable { mutableStateOf("Places in the world") }
-                var show by remember { mutableStateOf(true) }
                 val navController = rememberNavController()
                 val boxes by remember {
                     mutableStateOf(listOf(
@@ -175,128 +175,67 @@ class MainActivity : ComponentActivity() {
                                 color = Color(0xFFFFFFFF)
                                 )
                                     },
-
-                            actions = {
-                                var expanded by remember { mutableStateOf(false) }
-
-                                Column(Modifier.padding(20.dp)) {
-                                    IconButton(
-                                        onClick = {
-                                        expanded = true
-                                    }) {
-                                        Icon(imageVector = Icons.Filled.MoreVert,
-                                            contentDescription = "Buscar",
-                                            tint= secondary
-                                        )
-                                    }
-
-                                    DropdownMenu(
-                                        expanded = expanded,
-                                        onDismissRequest = { expanded = false },
-                                    ) {
-                                        DropdownMenuItem(
-                                            onClick = { expanded = false
-                                                navController.navigate("Principal")
-                                            },
-                                            leadingIcon ={
-                                                Icon(imageVector = Icons.Filled.Share,
-                                                    contentDescription = "stagg")
-                                            },
-                                            text = {Text(text = stringResource(R.string.stag123) )}
-
-                                        )
-                                        DropdownMenuItem(
-                                            onClick = { expanded = false
-                                                navController.navigate("Secundario")
-                                                      },
-                                            leadingIcon ={
-                                                Icon(imageVector = Icons.Filled.Lock,
-                                                    contentDescription = "lazy")
-                                            },
-                                            text = {Text(text = "lazy")},
-
-                                            )
-
-                                    }
-                                }
-                            },
                             colors= TopAppBarDefaults.topAppBarColors(
                                 containerColor = colorRGBSelected,
                                 titleContentColor = colorTitleSelected,
                             )
                         )
-                    },
-                    floatingActionButton = {
-
-                            FloatingActionButton(
-                                onClick = { show=false
-                                    navController.navigate("Principal")
-                                }
-                            ) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Floating action button.")
-                            }
-
-
                     }
                 )
                 { innerPadding ->
                     val navController = rememberNavController()
-                    NavHost(
-                        navController = navController, startDestination = "landing",
-                        enterTransition = { EnterTransition.None },
-                        exitTransition = { ExitTransition.None }                    ) {
-                        composable("Principal") {
-                            principal(modifier = Modifier.padding(innerPadding),
-                                boxes=boxes,
-                                imagenSelected = { imagenSelected = it},
-                                navController=navController
-                            )
-                        }
-                        composable("Secundario") {
-                            secundario(modifier = Modifier.padding(innerPadding),
-                                boxes=boxes,
-                                imagenSelected = { imagenSelected = it},
-                                navController=navController
 
+                    NavHost(
+                        navController = navController,
+                        startDestination = "principal",
+                        enterTransition = { EnterTransition.None },
+                        exitTransition = { ExitTransition.None }
+                    ) {
+
+                        composable("principal") {
+                            principal(
+                                modifier = Modifier.padding(innerPadding),
+                                boxes = boxes,
+                                imagenSelected = { imagenSelected = it },
+                                navController = navController
                             )
                         }
-                        composable("Terciario",
+
+                        composable("secundario") {
+                            secundario(
+                                modifier = Modifier.padding(innerPadding),
+                                boxes = boxes,
+                                imagenSelected = { imagenSelected = it },
+                                navController = navController
+                            )
+                        }
+
+                        composable(
+                            route = "terciario",
                             enterTransition = {
                                 fadeIn(
-                                    animationSpec = tween(
-                                        300, easing = LinearEasing
-                                    )
+                                    animationSpec = tween(300, easing = LinearEasing)
                                 ) + slideIntoContainer(
                                     animationSpec = tween(300, easing = EaseIn),
                                     towards = AnimatedContentTransitionScope.SlideDirection.Start
                                 )
-
-
                             },
                             exitTransition = {
                                 fadeOut(
-                                    animationSpec = tween(
-                                        300, easing = LinearEasing
-                                    )
+                                    animationSpec = tween(300, easing = LinearEasing)
                                 ) + slideOutOfContainer(
                                     animationSpec = tween(300, easing = EaseOut),
                                     towards = AnimatedContentTransitionScope.SlideDirection.End
                                 )
-
-
                             }
-
-
-
-                            ) {
+                        ) {
                             transformaciones(
                                 modifier = Modifier.padding(innerPadding),
-                                imagen= imagenSelected,
-                                colorRGBSelected = {  colorRGBSelected= it},
-                                colorTitleSelected = {  colorTitleSelected= it},
+                                imagen = imagenSelected,
+                                colorRGBSelected = { colorRGBSelected = it },
+                                colorTitleSelected = { colorTitleSelected = it }
                             )
                         }
-
                     }
                 }
             }
@@ -394,22 +333,19 @@ fun transformaciones(modifier: Modifier,
                      imagen: imagen,
                      colorRGBSelected: (Color) -> Unit,
                      colorTitleSelected: (Color) -> Unit,
-                     ) {
+) {
 
     Column(modifier.fillMaxSize(),
-        Arrangement.Center,
-        Alignment.CenterHorizontally
-        ) {
-
-
-        Text(
-            text = imagen.nombre,
-            modifier = Modifier.padding(20.dp)
-        )
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
         Image(
             painter = painterResource(imagen.direccion),
             contentDescription = null,
+            modifier = modifier
+                .fillMaxWidth()
+                .weight(1f),
+            contentScale = ContentScale.Crop
 
         )
         val context = LocalContext.current
@@ -420,64 +356,48 @@ fun transformaciones(modifier: Modifier,
             Palette.from(bitmap).generate()
         }
 
-        val vibrant: Palette.Swatch? = palette?.vibrantSwatch
-        val darkvibrant: Palette.Swatch? = palette?.darkVibrantSwatch
-        val lightvibrant: Palette.Swatch? = palette?.lightVibrantSwatch
-        val muted: Palette.Swatch? = palette?.mutedSwatch
-        val darkmuted: Palette.Swatch? = palette?.darkMutedSwatch
-        val lightmuted: Palette.Swatch? = palette?.lightMutedSwatch
+        val swatches = listOfNotNull(
+            palette.vibrantSwatch,
+            palette.darkVibrantSwatch,
+            palette.lightVibrantSwatch,
+            palette.mutedSwatch,
+            palette.darkMutedSwatch,
+            palette.lightMutedSwatch
+        )
 
-
-        Row (Modifier.fillMaxWidth().background(
-            color = vibrant?.let { Color(it.rgb) } ?: Color.Unspecified,
-            )){
-            Text("vibrant",
-                color = vibrant?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
-            )
-        }
-        colorRGBSelected(vibrant?.let { Color(it.rgb) } ?: Color.Unspecified)
-        colorTitleSelected(vibrant?.let { Color(it.titleTextColor) } ?: Color.Unspecified)
-        Row (Modifier.fillMaxWidth().background(
-            color = darkvibrant?.let { Color(it.rgb) } ?: Color.Unspecified,
-        )){
-            Text("darkvibrant",
-                color = darkvibrant?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
-            )
-        }
-        Row (Modifier.fillMaxWidth().background(
-            color = lightvibrant?.let { Color(it.rgb) } ?: Color.Unspecified,
-        )){
-            Text("lightvibrant",
-                color = lightvibrant?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
-            )
-        }
-        Row (Modifier.fillMaxWidth().background(
-            color = muted?.let { Color(it.rgb) } ?: Color.Unspecified,
-        )){
-            Text("muted",
-                color = muted?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
-            )
-        }
-        Row (Modifier.fillMaxWidth().background(
-            color = darkmuted?.let { Color(it.rgb) } ?: Color.Unspecified,
-        )){
-            Text("darkmuted",
-                color = darkmuted?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
-            )
-        }
-        Row (Modifier.fillMaxWidth().background(
-            color = lightmuted?.let { Color(it.rgb) } ?: Color.Unspecified,
-        )){
-            Text("lightmuted",
-                color = lightmuted?.let { Color(it.titleTextColor) } ?: Color.Unspecified,
-            )
+        palette.vibrantSwatch?.let {
+            colorRGBSelected(Color(it.rgb))
+            colorTitleSelected(Color(it.titleTextColor))
         }
 
 
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(swatches.size) { index ->
+                val swatch = swatches[index]
 
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = Color(swatch.rgb))
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ){
+                    Text(
+                        text = when (swatch) {
+                            palette.vibrantSwatch -> "Vibrant"
+                            palette.darkVibrantSwatch -> "Dark Vibrant"
+                            palette.lightVibrantSwatch -> "Light Vibrant"
+                            palette.mutedSwatch -> "Muted"
+                            palette.darkMutedSwatch -> "Dark Muted"
+                            palette.lightMutedSwatch -> "Light Muted"
+                            else -> ""
+                        },
+                        color = Color(swatch.titleTextColor)
+                    )
+                }
+            }
+        }
     }
-
-
-
 }
+
 
